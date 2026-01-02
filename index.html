@@ -2,13 +2,13 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Agente Autónomo 3D - Full Causal System</title>
+    <title>Agente Autónomo 3D - Sistema Final</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', monospace; color: #0f0; }
-        #ui { position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.9); padding: 20px; border: 2px solid #0f0; width: 350px; z-index: 100; }
-        input { width: 100%; background: #111; color: #0f0; border: 1px solid #0f0; padding: 10px; margin: 10px 0; outline: none; }
-        button { width: 100%; background: #0f0; color: #000; border: none; padding: 15px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
-        .console { font-size: 12px; height: 150px; overflow-y: auto; border-top: 1px solid #0f0; margin-top: 15px; padding-top: 10px; }
+        #ui { position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.9); padding: 20px; border: 2px solid #0f0; width: 350px; z-index: 100; box-shadow: 0 0 15px #0f0; }
+        input { width: 100%; background: #111; color: #0f0; border: 1px solid #0f0; padding: 10px; margin: 10px 0; outline: none; box-sizing: border-box; }
+        button { width: 100%; background: #0f0; color: #000; border: none; padding: 15px; cursor: pointer; font-weight: bold; width: 100%; }
+        .console { font-size: 12px; height: 120px; overflow-y: auto; border-top: 1px solid #0f0; margin-top: 15px; padding-top: 10px; }
     </style>
 </head>
 <body>
@@ -16,30 +16,46 @@
 <div id="ui">
     <strong>CENTRO DE CONTROL SENSORIAL</strong>
     <div id="status" style="margin-top:10px;">Propiocepción: [0.00, 0.00]</div>
-    <input type="text" id="prompt" placeholder="Ej: 'Lleva la manzana a la mesa'...">
-    <button onclick="enviarCerebro()">Sincronizar Cerebro</button>
-    <div id="log" class="console">> Sistema Iniciado...</div>
+    <input type="text" id="prompt" placeholder="Orden: 'Ve a la manzana'...">
+    <button onclick="enviarCerebro()">SINCRONIZAR CEREBRO</button>
+    <div id="log" class="console">> Conexión establecida con Pipedream...</div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
 
 <script>
+    // --- ESCENARIO ---
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    scene.add(new THREE.AmbientLight(0x444444), new THREE.PointLight(0xffffff, 1));
-    const room = new THREE.Mesh(new THREE.BoxGeometry(14, 7, 14), new THREE.MeshStandardMaterial({color: 0x1a1a1a, side: THREE.BackSide}));
+    // Luces (Esto arregla la oscuridad)
+    const ambient = new THREE.AmbientLight(0x404040, 1.5); scene.add(ambient);
+    const light = new THREE.PointLight(0xffffff, 1); light.position.set(5, 10, 7); scene.add(light);
+
+    // Habitación
+    const room = new THREE.Mesh(new THREE.BoxGeometry(15, 8, 15), new THREE.MeshStandardMaterial({color: 0x222222, side: THREE.BackSide}));
     scene.add(room);
 
-    const coords = { manzana: {x: 3.5, z: -3}, libro: {x: -3, z: 4}, pelota: {x: -5, z: -4} };
-    const agente = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 1.2), new THREE.MeshStandardMaterial({color: 0x00ff00}));
+    // --- OBJETOS ---
+    function crearObj(w, h, d, x, y, z, color) {
+        const obj = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), new THREE.MeshStandardMaterial({color}));
+        obj.position.set(x, y, z); scene.add(obj); return obj;
+    }
+
+    const mesa = crearObj(3, 1, 2, 4, 0.5, -3, 0x8b4513); // Mesa
+    const manzana = crearObj(0.3, 0.3, 0.3, 4, 1.15, -3, 0xff0000); // Manzana
+    const libro = crearObj(0.6, 0.1, 0.5, -3, 0.05, 4, 0x0000ff); // Libro
+    const pelota = crearObj(0.5, 0.5, 0.5, -5, 0.25, -4, 0xffff00); // Pelota
+
+    // Agente
+    const agente = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 1.2), new THREE.MeshStandardMaterial({color: 0x00ff00, emissive: 0x004400}));
     agente.position.y = 0.6; scene.add(agente);
 
-    camera.position.set(9, 9, 13); camera.lookAt(0,0,0);
+    camera.position.set(10, 10, 14); camera.lookAt(0,0,0);
 
     function animate() {
         requestAnimationFrame(animate); renderer.render(scene, camera);
@@ -47,31 +63,33 @@
     }
     animate();
 
+    // --- LÓGICA DE IA (PIPEDREAM) ---
     async function enviarCerebro() {
         const url = "https://eohbp1o3g5llmpv.m.pipedream.net";
         const prompt = document.getElementById('prompt').value.toLowerCase();
         const log = document.getElementById('log');
 
-        log.innerHTML += `<br>> Enviando sensores...`;
-        
+        log.innerHTML += `<br>> Sincronizando con Pipedream String...`;
+
         try {
             await fetch(url, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ instruccion: prompt, pos: agente.position })
+                body: JSON.stringify({ instruction: prompt, agent_pos: agente.position })
             });
 
-            log.innerHTML += `<br>> Memoria consultada. Moviendo...`;
-            
-            let target = null;
-            if(prompt.includes("manzana")) target = coords.manzana;
-            else if(prompt.includes("libro")) target = coords.libro;
-            else if(prompt.includes("pelota")) target = coords.pelota;
+            // Coordenadas de destino
+            let dest = { x: agente.position.x, z: agente.position.z };
+            if(prompt.includes("manzana") || prompt.includes("mesa")) dest = {x: 4, z: -3};
+            else if(prompt.includes("libro")) dest = {x: -3, z: 4};
+            else if(prompt.includes("pelota")) dest = {x: -5, z: -4};
 
-            if(target) {
-                gsap.to(agente.position, { x: target.x, z: target.z, duration: 2, onComplete: () => { log.innerHTML += `<br>> Acción completada.`; } });
-            }
-        } catch(e) { log.innerHTML += `<br>> Error de conexión.`; }
+            gsap.to(agente.position, {
+                x: dest.x, z: dest.z, duration: 2,
+                onStart: () => log.innerHTML += `<br>> Acción: Ejecutando ruta...`,
+                onComplete: () => log.innerHTML += `<br>> Destino alcanzado.`
+            });
+        } catch(e) { log.innerHTML += `<br>> Error: No se pudo contactar al cerebro.`; }
     }
 </script>
 </body>
