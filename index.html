@@ -5,50 +5,61 @@
     <title>Agente Autónomo - Sistema Reparado</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; font-family: monospace; color: #0f0; }
-        #ui { position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.8); padding: 20px; border: 1px solid #0f0; width: 300px; z-index: 100; }
+        #ui { position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.85); padding: 20px; border: 2px solid #0f0; width: 300px; z-index: 100; }
         input { width: 100%; background: #000; color: #0f0; border: 1px solid #0f0; padding: 10px; margin: 10px 0; box-sizing: border-box; }
         button { width: 100%; background: #0f0; color: #000; border: none; padding: 15px; cursor: pointer; font-weight: bold; width: 100%; }
+        #log { font-size: 12px; margin-top: 10px; border-top: 1px solid #0f0; padding-top: 5px; }
     </style>
 </head>
 <body>
 <div id="ui">
-    <strong>SISTEMA OPERATIVO ACTIVO</strong>
+    <strong>CENTRO DE CONTROL</strong>
     <input type="text" id="prompt" placeholder="Escribe: manzana">
     <button onclick="ejecutar()">SINCRONIZAR CEREBRO</button>
+    <div id="log">> Sistema Listo.</div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
 <script>
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer();
+    const renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // LUZ (Esto soluciona la oscuridad)
-    scene.add(new THREE.AmbientLight(0xffffff, 1));
+    // LUZ TOTAL (Esto arregla el cuarto oscuro)
+    scene.add(new THREE.AmbientLight(0xffffff, 1.2));
 
     // OBJETOS
     const room = new THREE.Mesh(new THREE.BoxGeometry(15, 8, 15), new THREE.MeshStandardMaterial({color: 0x333333, side: THREE.BackSide}));
     scene.add(room);
     const agente = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 1.2), new THREE.MeshStandardMaterial({color: 0x00ff00}));
     agente.position.y = 0.6; scene.add(agente);
-    const manzana = new THREE.Mesh(new THREE.SphereGeometry(0.2), new THREE.MeshStandardMaterial({color: 0xff0000}));
-    manzana.position.set(4, 0.2, -3); scene.add(manzana);
+    const manzana = new THREE.Mesh(new THREE.SphereGeometry(0.25), new THREE.MeshStandardMaterial({color: 0xff0000}));
+    manzana.position.set(4, 0.25, -3); scene.add(manzana);
 
-    camera.position.set(8, 8, 10); camera.lookAt(0,0,0);
+    camera.position.set(10, 10, 12); camera.lookAt(0,0,0);
     function animate() { requestAnimationFrame(animate); renderer.render(scene, camera); }
     animate();
 
     function ejecutar() {
         const val = document.getElementById('prompt').value.toLowerCase();
-        // Sincronización con Pipedream
-        fetch("https://eohbp1o3g5llmpv.m.pipedream.net", { method: 'POST', body: JSON.stringify({orden: val}) });
+        const log = document.getElementById('log');
+        log.innerText = "> Enviando a Pipedream...";
+
+        // Sincronización
+        fetch("https://eohbp1o3g5llmpv.m.pipedream.net", { 
+            method: 'POST', 
+            mode: 'no-cors',
+            body: JSON.stringify({orden: val}) 
+        });
         
-        // Movimiento local inmediato
+        // Movimiento Local (Garantiza que funcione sí o sí)
         let target = {x: 0, z: 0};
         if(val.includes("manzana")) target = {x: 4, z: -3};
-        gsap.to(agente.position, { x: target.x, z: target.z, duration: 2 });
+        gsap.to(agente.position, { x: target.x, z: target.z, duration: 2, onComplete: () => {
+            log.innerText = "> Objetivo alcanzado.";
+        }});
     }
 </script>
 </body>
