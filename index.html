@@ -28,7 +28,7 @@
     document.body.appendChild(renderer.domElement);
 
     // LUZ TOTAL (Esto arregla el cuarto oscuro)
-    scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+    scene.add(new THREE.AmbientLight(0xffffff, 5.0));
 
     // OBJETOS
     const room = new THREE.Mesh(new THREE.BoxGeometry(15, 8, 15), new THREE.MeshStandardMaterial({color: 0x333333, side: THREE.BackSide}));
@@ -64,3 +64,4 @@
 </script>
 </body>
 </html>
+
