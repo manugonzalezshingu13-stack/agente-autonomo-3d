@@ -25,13 +25,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
 
 <script>
+    // --- ESCENARIO ---
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // ILUMINACIÓN (Arregla la oscuridad de tu imagen previa)
+    // ILUMINACIÓN (Arregla la oscuridad de tu imagen anterior)
     scene.add(new THREE.AmbientLight(0x404040, 2)); 
     const pointLight = new THREE.PointLight(0xffffff, 1.5);
     pointLight.position.set(5, 10, 7);
@@ -41,16 +42,16 @@
     const room = new THREE.Mesh(new THREE.BoxGeometry(15, 8, 15), new THREE.MeshStandardMaterial({color: 0x222222, side: THREE.BackSide}));
     scene.add(room);
 
-    // OBJETOS DEL MUNDO
+    // --- OBJETOS DEL MUNDO ---
     const crearObj = (w, h, d, x, y, z, color) => {
         const obj = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), new THREE.MeshStandardMaterial({color}));
         obj.position.set(x, y, z); scene.add(obj); return obj;
     };
 
-    const mesa = crearObj(3, 1, 2, 4, 0.5, -3, 0x8b4513);
-    const manzana = crearObj(0.3, 0.3, 0.3, 4, 1.15, -3, 0xff0000);
-    const libro = crearObj(0.6, 0.1, 0.5, -3, 0.05, 4, 0x0000ff);
-    const pelota = crearObj(0.5, 0.5, 0.5, -5, 0.25, -4, 0xffff00);
+    const mesa = crearObj(3, 1, 2, 4, 0.5, -3, 0x8b4513); // Mesa Café
+    const manzana = crearObj(0.3, 0.3, 0.3, 4, 1.15, -3, 0xff0000); // Manzana Roja
+    const libro = crearObj(0.6, 0.1, 0.5, -3, 0.05, 4, 0x0000ff); // Libro Azul
+    const pelota = crearObj(0.5, 0.5, 0.5, -5, 0.25, -4, 0xffff00); // Pelota Amarilla
 
     // EL AGENTE (Cilindro verde)
     const agente = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 1.2), new THREE.MeshStandardMaterial({color: 0x00ff00, emissive: 0x004400}));
@@ -67,21 +68,25 @@
     }
     animate();
 
-    // COMUNICACIÓN CON EL CEREBRO (PIPEDREAM)
+    // --- COMUNICACIÓN CON EL CEREBRO ---
     async function enviarCerebro() {
-        const url = "https://eohbp1o3g5llmpv.m.pipedream.net";
+        const url = "https://eohbp1o3g5llmpv.m.pipedream.net"; // URL de tu Webhook Proxy
         const prompt = document.getElementById('prompt').value.toLowerCase();
         const log = document.getElementById('log');
 
-        log.innerHTML += `<br>> Sincronizando con Cerebro en la Nube...`;
+        log.innerHTML += `<br>> Sincronizando datos con la nube...`;
 
         try {
             await fetch(url, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ instruction: prompt, agent_pos: agente.position })
+                body: JSON.stringify({ 
+                    instruction: prompt, 
+                    agent_pos: {x: agente.position.x, z: agente.position.z} 
+                })
             });
 
+            // Lógica de destino basada en la orden
             let dest = { x: agente.position.x, z: agente.position.z };
             if(prompt.includes("manzana") || prompt.includes("mesa")) dest = {x: 4, z: -3};
             else if(prompt.includes("libro")) dest = {x: -3, z: 4};
@@ -89,11 +94,11 @@
 
             gsap.to(agente.position, {
                 x: dest.x, z: dest.z, duration: 2,
-                onStart: () => log.innerHTML += `<br>> Ejecutando ruta motora...`,
-                onComplete: () => log.innerHTML += `<br>> Destino alcanzado.`
+                onStart: () => log.innerHTML += `<br>> Ejecutando orden: ${prompt}`,
+                onComplete: () => log.innerHTML += `<br>> Objetivo alcanzado.`
             });
         } catch(e) { 
-            log.innerHTML += `<br>> Error de conexión con Pipedream.`; 
+            log.innerHTML += `<br>> Error: No se pudo conectar con Pipedream.`; 
         }
     }
 </script>
