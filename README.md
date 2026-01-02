@@ -14,3 +14,12 @@ Este proyecto implementa un agente autónomo que habita un entorno 3D, capaz de 
 3. El sistema consulta el **Data Store** para recuperar la última acción realizada.
 4. La IA decide el siguiente movimiento basándose en el Presente + Pasado.
 5. El agente ejecuta el movimiento en el entorno 3D.
+
+## 🚀 Demo en Vivo
+Puedes interactuar con el agente aquí: [TU_URL_DE_GITHUB_PAGES]
+
+## 🛠️ Tecnologías
+* **Three.js:** Renderizado del mundo 3D.
+* **Pipedream String:** Orquestación de IA y Webhooks.
+* **OpenAI:** Cerebro lógico del agente.
+* **Data Stores:** Memoria persistente de acciones.
