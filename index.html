@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Agente Aut髇omo 3D - Sistema Final</title>
+    <title>Agente Aut贸nomo 3D - Sistema Final</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', monospace; color: #0f0; }
         #ui { position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.9); padding: 20px; border: 2px solid #0f0; width: 350px; z-index: 100; box-shadow: 0 0 15px #0f0; }
@@ -15,10 +15,10 @@
 
 <div id="ui">
     <strong>CENTRO DE CONTROL SENSORIAL</strong>
-    <div id="status" style="margin-top:10px;">Propiocepci髇: [0.00, 0.00]</div>
+    <div id="status" style="margin-top:10px;">Propiocepci贸n: [0.00, 0.00]</div>
     <input type="text" id="prompt" placeholder="Orden: 'Ve a la manzana'...">
     <button onclick="enviarCerebro()">SINCRONIZAR CEREBRO</button>
-    <div id="log" class="console">> Conexi髇 establecida con Pipedream...</div>
+    <div id="log" class="console">> Conexi贸n establecida con Pipedream...</div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -36,7 +36,7 @@
     const ambient = new THREE.AmbientLight(0x404040, 1.5); scene.add(ambient);
     const light = new THREE.PointLight(0xffffff, 1); light.position.set(5, 10, 7); scene.add(light);
 
-    // Habitaci髇
+    // Habitaci贸n
     const room = new THREE.Mesh(new THREE.BoxGeometry(15, 8, 15), new THREE.MeshStandardMaterial({color: 0x222222, side: THREE.BackSide}));
     scene.add(room);
 
@@ -59,11 +59,11 @@
 
     function animate() {
         requestAnimationFrame(animate); renderer.render(scene, camera);
-        document.getElementById('status').innerText = `Propiocepci髇: [${agente.position.x.toFixed(2)}, ${agente.position.z.toFixed(2)}]`;
+        document.getElementById('status').innerText = `Propiocepci贸n: [${agente.position.x.toFixed(2)}, ${agente.position.z.toFixed(2)}]`;
     }
     animate();
 
-    // --- L覩ICA DE IA (PIPEDREAM) ---
+    // --- L脫GICA DE IA (PIPEDREAM) ---
     async function enviarCerebro() {
         const url = "https://eohbp1o3g5llmpv.m.pipedream.net";
         const prompt = document.getElementById('prompt').value.toLowerCase();
@@ -86,7 +86,7 @@
 
             gsap.to(agente.position, {
                 x: dest.x, z: dest.z, duration: 2,
-                onStart: () => log.innerHTML += `<br>> Acci髇: Ejecutando ruta...`,
+                onStart: () => log.innerHTML += `<br>> Acci贸n: Ejecutando ruta...`,
                 onComplete: () => log.innerHTML += `<br>> Destino alcanzado.`
             });
         } catch(e) { log.innerHTML += `<br>> Error: No se pudo contactar al cerebro.`; }
