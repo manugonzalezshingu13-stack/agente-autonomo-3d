@@ -1,25 +1,20 @@
-# 🤖 Autonomous Agent 3D: Causal Memory Architecture
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+</div>
 
-Este proyecto implementa un agente autónomo que habita un entorno 3D, capaz de procesar órdenes en lenguaje natural y tomar decisiones basadas en su **historial de acciones (Memoria de Causalidad)**.
+# Run and deploy your AI Studio app
 
-## 🧠 Arquitectura
-* **Frontend:** Interfaz 3D construida con `Three.js` y animaciones fluidas con `GSAP`.
-* **Cerebro:** Orquestador en la nube usando `Pipedream String`.
-* **Razonamiento:** Integración con modelos de lenguaje (OpenAI) para clasificación de intención.
-* **Memoria:** Persistencia de estados mediante `Data Stores` de Pipedream para retención de contexto temporal.
+This contains everything you need to run your app locally.
 
-## 🛠️ Flujo de Datos
-1. El usuario envía una orden desde la interfaz 3D.
-2. El Webhook recibe los sensores (posición y entorno).
-3. El sistema consulta el **Data Store** para recuperar la última acción realizada.
-4. La IA decide el siguiente movimiento basándose en el Presente + Pasado.
-5. El agente ejecuta el movimiento en el entorno 3D.
+View your app in AI Studio: https://ai.studio/apps/drive/1_TnYvv7-NUPMgxhUy3aQIZ9uOuIdsEUs
 
-## 🚀 Demo en Vivo
-Puedes interactuar con el agente aquí: [TU_URL_DE_GITHUB_PAGES]
+## Run Locally
 
-## 🛠️ Tecnologías
-* **Three.js:** Renderizado del mundo 3D.
-* **Pipedream String:** Orquestación de IA y Webhooks.
-* **OpenAI:** Cerebro lógico del agente.
-* **Data Stores:** Memoria persistente de acciones.
+**Prerequisites:**  Node.js
+
+
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`

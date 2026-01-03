@@ -1,138 +1,40 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Simulación Multimodal - Agente Autónomo 3D</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manu Lean Industrial OS Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', monospace; }
-        #interfaz {
-            position: absolute; top: 20px; left: 20px; width: 300px;
-            background: rgba(0, 40, 0, 0.8); color: #0f0; border: 2px solid #0f0;
-            padding: 15px; box-shadow: 0 0 15px #0f0; z-index: 100;
+        body { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(8px); }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
-        input {
-            width: 100%; background: #000; border: 1px solid #0f0; color: #0f0;
-            padding: 10px; box-sizing: border-box; margin: 10px 0;
-        }
-        button {
-            width: 100%; background: #0f0; color: #000; border: none;
-            padding: 10px; font-weight: bold; cursor: pointer;
-        }
-        #consola { height: 100px; overflow-y: auto; font-size: 12px; margin-top: 10px; border-top: 1px solid #040; }
-        .error { color: #f00; }
+        .animate-spin-slow { animation: spin-slow 12s linear infinite; }
     </style>
-</head>
-<body>
-
-<div id="interfaz">
-    <h3 style="margin-top:0;">SIMULACIÓN: CIRCUITO DE SEÑALES</h3>
-    <div id="pos-display">POS: [0.0, 0, 0.0]</div>
-    <input type="text" id="comando" placeholder="Comando del supervisor...">
-    <button onclick="enviarCiclo()">ENVIAR SEÑAL SENSORIAL</button>
-    <div id="consola"></div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-<script>
-    // 1. CONFIGURACIÓN DEL MUNDO 3D
-    const escena = new THREE.Scene();
-    const camara = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const render = new THREE.WebGLRenderer({ antialias: true });
-    render.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(render.domElement);
-
-    // Luces
-    const luzAmbiente = new THREE.AmbientLight(0x404040); escena.add(luzAmbiente);
-    const luzPunto = new THREE.PointLight(0xffffff, 1); luzPunto.position.set(5, 5, 5); escena.add(luzPunto);
-
-    // Suelo y Paredes
-    const suelo = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshPhongMaterial({ color: 0x222222 }));
-    suelo.rotation.x = -Math.PI / 2; escena.add(suelo);
-
-    // Agente (Cilindro Verde)
-    const agenteGeom = new THREE.CylinderGeometry(0.5, 0.5, 2, 32);
-    const agenteMat = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
-    const agente = new THREE.Mesh(agenteGeom, agenteMat);
-    agente.position.y = 1; escena.add(agente);
-
-    // OBJETOS DEL ENTORNO
-    const mesa = new THREE.Mesh(new THREE.BoxGeometry(4, 1, 2), new THREE.MeshPhongMaterial({ color: 0x5d4037 }));
-    mesa.position.set(4, 0.5, -3); escena.add(mesa);
-
-    const silla = new THREE.Mesh(new THREE.BoxGeometry(1, 1.5, 1), new THREE.MeshPhongMaterial({ color: 0x424242 }));
-    silla.position.set(3, 0.75, -1); escena.add(silla);
-
-    const manzana = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), new THREE.MeshPhongMaterial({ color: 0xff0000 }));
-    manzana.position.set(4, 1.1, -3); escena.add(manzana);
-
-    camara.position.set(8, 10, 12);
-    camara.lookAt(0, 0, 0);
-
-    let objetivoDestino = null;
-
-    // 2. SISTEMA DE SEÑALES (CONEXIÓN CON PIPEDREAM)
-    async function enviarCiclo() {
-        const input = document.getElementById("comando");
-        const consola = document.getElementById("consola");
-        const posDisplay = document.getElementById("pos-display");
-
-        const telemetria = {
-            input_humano: input.value,
-            pos_agente: { x: agente.position.x, z: agente.position.z },
-            vision_objetos: "mesa(4,-3), manzana(4,-3), silla(3,-1)"
-        };
-
-        consola.innerHTML += `> Enviando señal: "${input.value}"<br>`;
-        
-        try {
-            // TU URL DE PIPEDREAM
-            const respuesta = await fetch("https://eohbp1o3g5llmpv.m.pipedream.net", {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(telemetria)
-            });
-
-            const datos = await respuesta.json();
-
-            if (datos.destino) {
-                objetivoDestino = datos.destino;
-                consola.innerHTML += `<span style="color:cyan">> IA: ${datos.mensaje}</span><br>`;
-            }
-        } catch (err) {
-            consola.innerHTML += `<span class="error">> ERROR: Fallo en el circuito de señales.</span><br>`;
-            console.error(err);
-        }
-        input.value = "";
-    }
-
-    // 3. BUCLE DE ANIMACIÓN Y MOVIMIENTO
-    function animate() {
-        requestAnimationFrame(animate);
-
-        if (objetivoDestino) {
-            const dx = objetivoDestino.x - agente.position.x;
-            const dz = objetivoDestino.z - agente.position.z;
-            const distancia = Math.sqrt(dx*dx + dz*dz);
-
-            if (distancia > 0.1) {
-                agente.position.x += dx * 0.05;
-                agente.position.z += dz * 0.05;
-                document.getElementById("pos-display").innerText = 
-                    `POS: [${agente.position.x.toFixed(1)}, 0, ${agente.position.z.toFixed(1)}]`;
-            } else {
-                objetivoDestino = null; // Llegó al destino
-            }
-        }
-        render.render(escena, camara);
-    }
-    animate();
-
-    window.addEventListener('resize', () => {
-        camara.aspect = window.innerWidth / window.innerHeight;
-        camara.updateProjectionMatrix();
-        render.setSize(window.innerWidth, window.innerHeight);
-    });
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+    "recharts": "https://esm.sh/recharts@^3.6.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
+  }
+}
 </script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-slate-50 text-slate-900">
+    <div id="root"></div>
+<script type="module" src="/index.tsx"></script>
 </body>
 </html>

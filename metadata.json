@@ -1,0 +1,8 @@
+
+{
+  "name": "Manu Lean Industrial OS Hub",
+  "description": "Enterprise-grade industrial operating system hub for process optimization, data quality, and lean metadata management.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
